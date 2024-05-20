@@ -3,126 +3,139 @@
 #include <string.h>
 #include "fonctions.h"
 
+#define REALOC_SIZE 256
 
-
-//
-// Created by lucas on 29/03/2024.
-//
-
-COLUMN *create_column(char* title)
+COLUMN *create_column(ENUM_TYPE type, char *titre)
 {
     COLUMN* col = (COLUMN*)malloc(sizeof(COLUMN));
-    col->titre =  (char*)malloc(strlen(title));
-    strcpy(col->titre, title);
+    col->title =  (char*)malloc(strlen(titre));
+    strcpy(col->title, titre);
+    col->column_type = type;
+    col-> data = NULL;
+    col -> max_size = 256;
+    col -> size = 0;
 
     //col->titre=strdup(title);
-    col -> valeurs = malloc(256 * sizeof(int));
-    col -> taille_physique = 256;
-    col -> taille_logique = 0;
-    return col;
-}
+    //col -> data = malloc(256 * sizeof(int));
 
-int insert_value(COLUMN* col, int value)
-{
-    if(col -> valeurs == NULL)
+    if(col-> data == NULL)
     {
-        printf("\n Réallocation de mémoire\n");
-        col->valeurs = realloc(col->valeurs, col -> taille_physique * sizeof(int));
+        return col;
     }
-    col -> valeurs[col -> taille_logique] = value;
-    if (col->valeurs[col -> taille_logique])
-    {
-        col -> taille_logique += 1;
-        return 1;
-    }
-    return 0;
+    return NULL;
 }
 
 void delete_column(COLUMN **col)
 {
-    free(col);
+    free((*col)->data);
+    (*col)->data = NULL;
     col = NULL;
 }
 
-void print_col(COLUMN* col)
-{
-    int i;
-    int L;
-    printf("\n La taille logique est de : %d \nValeurs dans LA colonne :  ", col -> taille_logique);
-    //L = strlen(col);
-    for(i=0;i<col -> taille_logique;i++)
-    printf("%d  ", col->valeurs[i]);
-    printf("\n");
-}
 
-void value_added(int x)
-{
-    if(x)
-        printf("\n Value added successfully to my column\n");
-    else
-        printf("Error adding value to my column\n");
-}
 
-int occurences(COLUMN* col, int x)
-{
-    int i;
-    int occurences = 0;
-    for(i=0; i< col -> taille_logique; i++)
-    {
-        if (col -> valeurs[i] == x)
-        {
-            occurences += 1;
-        }
+void convert_value(COLUMN* col, unsigned long long int i, char* str, int size){
+    col->max_size += REALOC_SIZE;
+    col->data = realloc(col->data, col->max_size);
+
+    switch(col->column_type){
+
+        case INT:
+            snprintf(str, size, "%d", *((int*)col->data[i]));
+            break;
+
+        case CHAR:
+            snprintf(str, size, "%d", *((char*)col->data[i]));
+            break;
+
+        case FLOAT:
+            snprintf(str, size, "%d", *((float*)col->data[i]));
+            break;
+
+        case DOUBLE:
+            snprintf(str, size, "%d", *((double*)col->data[i]));
+            break;
+
+        case STRING:
+            snprintf(str, size, "%d", *((char**)col->data[i]));
+            break;
+
+        case UINT:
+            snprintf(str, size, "%d", *((unsigned int*)col->data[i]));
+            break;
+
+        case STRUCTURE:
+            snprintf(str, size, "%d", *((void**)col->data[i]));
+            break;
+
+        case NULLVAL:
+            snprintf(str, size, "%d", *((double*)col->data[i]));
+            break;
     }
-    return occurences;
+
 }
 
-int retourne_val(COLUMN* col, int i)
-{
-    return col -> valeurs[i];
-}
+#define N 5
 
-int supérieur(COLUMN* col, int x)
-{
-    int i;
-    int nb = 0;
-    for(i=0; i < col -> taille_logique; i++)
-    {
-        if(col -> valeurs[i] > x)
-        {
-            nb += 1;
-            //printf("%d  ", col -> valeurs[i]);
-        }
+void print_col(COLUMN* col) {
+    char str[5];
+    for(int i=0; i<col->size; i++) {
+
+        convert_value(col, i, str, N);
+        printf("       %s \n", str);
     }
-    return nb;
 }
+int insert_value(COLUMN *col, void *value) {
+    col->max_size += REALOC_SIZE;
+    col->data = realloc(col->data, col->max_size);
 
-int inférieur(COLUMN* col, int x)
-{
-    int i;
-    int nb = 0;
-    for(i=0; i < col -> taille_logique; i++)
-    {
-        if(col -> valeurs[i] < x)
-        {
-            nb += 1;
-            //printf("%d  ", col -> valeurs[i]);
-        }
+    if(col->data == NULL) {
+        return 0;
     }
-    return nb;
-}
 
-int égales(COLUMN* col, int x)
-{
-    int i;
-    int nb = 0;
-    for(i=0; i < col -> taille_logique; i++)
-    {
-        if(col -> valeurs[i] == x)
-        {
-            nb += 1;
-            //printf("%d  ", col -> valeurs[i]);
-        }
+    switch(col->column_type) {
+        case NULLVAL:
+            col->data[col->size] = NULL;
+            break;
+
+        case UINT:
+            col->data[col->size] = malloc(sizeof(unsigned int));
+            *((unsigned int*)col->data[col->size])= *((unsigned int*)value);
+            break;
+
+        case INT:
+            col->data[col->size] = malloc(sizeof(int));
+            *((int*)col->data[col->size])= *((int*)value);
+            break;
+
+        case CHAR:
+            col->data[col->size] = malloc(sizeof(int));
+            *((char*)col->data[col->size])= *((char*)value);
+            break;
+
+        case FLOAT:
+            col->data[col->size] = malloc(sizeof(float));
+            *((float*)col->data[col->size])= *((float*)value);
+            break;
+
+        case DOUBLE:
+            col->data[col->size] = malloc(sizeof(double));
+            *((double*)col->data[col->size])= *((double*)value);
+            break;
+
+        case STRING:
+            col->data[col->size] = malloc(sizeof(char *));
+            *((char**)col->data[col->size])= *((char**)value);
+            break;
+
+        case STRUCTURE:
+            col->data[col->size] = malloc(sizeof(void*));
+            *((void**)col->data[col->size])= *((void**)value);
+            break;
+
+
     }
-    return nb;
+
+    col->size++;
+    return 1; // Success
 }

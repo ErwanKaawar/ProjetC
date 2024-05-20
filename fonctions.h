@@ -1,42 +1,44 @@
 //
-// Created by lucas on 29/03/2024.
+// Created by kawar on 20/05/2024.
 //
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#ifndef PROJET_C_2_FONCTIONS_H
+#define PROJET_C_2_FONCTIONS_H
+
+enum enum_type
+{
+    NULLVAL = 1, UINT, INT, CHAR, FLOAT, DOUBLE, STRING, STRUCTURE
+};
+typedef enum enum_type ENUM_TYPE;
+
+union column_type{
+    unsigned int uint_value;
+    signed int int_value;
+    char char_value;
+    float float_value;
+    double double_value;
+    char* string_value;
+    void* struct_value;
+};
+typedef union column_type COL_TYPE ;
+
 
 struct column {
-    char* titre;
-    int taille_logique;
-    int taille_physique;
-    int* valeurs;
+    char *title;
+    unsigned int size; //logical size
+    unsigned int max_size; //physical size
+    ENUM_TYPE column_type;
+    COL_TYPE **data; // array of pointers to stored data
+    unsigned long long int *index; // array of integers
 };
-
 typedef struct column COLUMN;
 
-#ifndef PROJET_CLION_FONCTIONS_H
-#define PROJET_CLION_FONCTIONS_H
 
-
-COLUMN *create_column(char* title);
-
-int insert_value(COLUMN* col, int value);
-
+COLUMN *create_column(ENUM_TYPE type, char *title);
 void delete_column(COLUMN **col);
-
+int insert_value(COLUMN *col, void *value);
+void convert_value(COLUMN *col, unsigned long long int i, char *str, int size);
 void print_col(COLUMN* col);
 
-void value_added(int x);
 
-int occurences(COLUMN* col, int x);
-
-int retourne_val(COLUMN* col, int i);
-
-int supérieur(COLUMN* col, int x);
-
-int inférieur(COLUMN* col, int x);
-
-int égales(COLUMN* col, int x);
-
-
-#endif //PROJET_CLION_FONCTIONS_H
+#endif //PROJET_C_2_FONCTIONS_H
