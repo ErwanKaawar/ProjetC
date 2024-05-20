@@ -1,6 +1,4 @@
 # PROJET CTDATAFRAME - PAR LUCAS RINAUDO ET ERWAN KAAWAR
-LIEN DU GITHUB : https://github.com/ErwanKaawar/ProjetC
-
 Ce projet a pour but de manipuler des structures de données permettant de stocker différents
 types de données.
 
